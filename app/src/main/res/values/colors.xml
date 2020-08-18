@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#000</color> //#6200EE
+    <color name="colorPrimaryDark">#000</color> //#3700B3
+    <color name="colorAccent">#222222</color> //#03DAC5, 050
+    <color name="Ready">#005000</color> //#0f0
+    <color name="NotReady">#500000</color> //#f00
+    <color name="Idle">#515151</color>
+</resources>
