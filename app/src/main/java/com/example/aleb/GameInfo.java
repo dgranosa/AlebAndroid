@@ -50,6 +50,8 @@ public class GameInfo {
     int[] cards;
     int[] playgroundCards;
 
+    ArrayList<String>[] lastRoundCards = new ArrayList[4];
+
     Adut adut;
     String adutSelectedByPlayer;
 
@@ -76,6 +78,11 @@ public class GameInfo {
         currentPlayer = parseFromServerIndex(0);
         startingPlayer = currentPlayer;
         lastPlayer = (startingPlayer + 3) % 4;
+
+        lastRoundCards[0] = new ArrayList<>();
+        lastRoundCards[1] = new ArrayList<>();
+        lastRoundCards[2] = new ArrayList<>();
+        lastRoundCards[3] = new ArrayList<>();
 
         this.gameInfoInterface = gameInfoInterface;
     }
@@ -167,6 +174,18 @@ public class GameInfo {
         for (int i = 0; i < tmp.length; i++)
             cards[i] = Integer.parseInt(tmp[i]);
         gameInfoInterface.onCardChange();
+    }
+
+    public void updateLastRoundCards(int id, String cards, String talon) {
+        id = parseFromServerIndex(id);
+        String[] cardsP = cards.split("\\|"), talonP = talon.split("\\|");
+
+        lastRoundCards[id].clear();
+        for (String card : cardsP)
+            lastRoundCards[id].add(card);
+        lastRoundCards[id].add("32");
+        for (String card : talonP)
+            lastRoundCards[id].add(card);
     }
 
     int parseFromServerIndex(int i) {

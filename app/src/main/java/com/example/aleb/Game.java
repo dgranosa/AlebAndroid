@@ -279,9 +279,11 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
                     } else {
                         set.connect(img.getId(), ConstraintSet.LEFT, lay.getId(), ConstraintSet.LEFT, 0);
                         set.connect(img.getId(), ConstraintSet.RIGHT, lay.getId(), ConstraintSet.RIGHT, 0);
-                        set.connect(img.getId(), ConstraintSet.TOP, lay.getId(), ConstraintSet.TOP, i * (int)(40 * getResources().getDisplayMetrics().density));
+                        set.connect(img.getId(), ConstraintSet.TOP, lay.getId(), ConstraintSet.TOP, i * (int)(30 * getResources().getDisplayMetrics().density));
                     }
                     set.applyTo(lay);
+                    if (c[i].equals("32"))
+                        img.setVisibility(View.INVISIBLE);
                 }
                 lay.setVisibility(View.VISIBLE);
             }
@@ -299,6 +301,20 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
                 }
             }
         });
+    }
+
+    public void showLastRoundCards(View v) {
+        int id = getIdPosition(playerId, v.getId());
+        if (gameInfo.lastRoundCards[id].size() == 0)
+            return;
+
+        popuniZvanja(id, gameInfo.lastRoundCards[id].toArray(new String[0]));
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                hideZvanja();
+            }
+        }, 2000);
     }
 
     @Override
@@ -423,6 +439,9 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
                 i.putExtra("team", gameInfo.myTeam);
                 finish();
                 startActivity(i);
+                break;
+            case "FinalCards":
+                gameInfo.updateLastRoundCards(Integer.parseInt(msg[1]), msg[2], msg[3]);
                 break;
         }
     }
