@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -49,7 +50,10 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
         tcpClient = TCPCommunicator.getInstance();
         tcpClient.addListener(this);
 
-        startGame();
+        if (getIntent().getExtras().getBoolean("reconnect", false))
+            TCPCommunicator.sendMessage("Reconnecting", UIHandler, this);
+        else
+            startGame();
     }
 
     private void startGame() {
@@ -63,28 +67,16 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
             ((TextView)findViewById(playerId[i])).setText(gameInfo.players.get(i));
     }
 
-    private void showStatus(int id, String msg) {
-        showStatus(id, msg, 0);
-    }
+    private void showStatus(final int id, final String msg) {
+        if (id == -1)
+            return;
 
-    private void showStatus(final int id, final String msg, final int ms) {
         UIHandler.post(new Runnable() {
             @Override
             public void run() {
                 final TextView status = findViewById(statusId[id]);
-
                 status.setText(msg);
                 status.setVisibility(View.VISIBLE);
-
-                if (ms == 0)
-                    return;
-
-                new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        status.setVisibility(View.INVISIBLE);
-                    }
-                }, ms);
             }
         });
     }
@@ -279,7 +271,7 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
                     } else {
                         set.connect(img.getId(), ConstraintSet.LEFT, lay.getId(), ConstraintSet.LEFT, 0);
                         set.connect(img.getId(), ConstraintSet.RIGHT, lay.getId(), ConstraintSet.RIGHT, 0);
-                        set.connect(img.getId(), ConstraintSet.TOP, lay.getId(), ConstraintSet.TOP, i * (int)(30 * getResources().getDisplayMetrics().density));
+                        set.connect(img.getId(), ConstraintSet.TOP, lay.getId(), ConstraintSet.TOP, i * (int)(28 * getResources().getDisplayMetrics().density));
                     }
                     set.applyTo(lay);
                     if (c[i].equals("32"))
@@ -312,9 +304,14 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                ConstraintLayout lay = findViewById(getResources().getIdentifier("g_lay_zvanja_player"+id, "id", getPackageName()));
-                lay.removeAllViews();
-                lay.setVisibility(View.GONE);
+                UIHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        ConstraintLayout lay = findViewById(getResources().getIdentifier("g_lay_zvanja_player"+id, "id", getPackageName()));
+                        lay.removeAllViews();
+                        lay.setVisibility(View.GONE);
+                    }
+                });
             }
         }, 2000);
     }
@@ -330,6 +327,15 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
         String[] msg = message.split(";", -1);
 
         switch (msg[0]) {
+            case "Reconnect":
+                gameInfo = new GameInfo(Room.parse(msg[1]).getPlayers(), this);
+
+                for (int i = 0; i < playerId.length; i++)
+                    ((TextView)findViewById(playerId[i])).setText(gameInfo.players.get(i));
+
+                gameInfo.scoreHistory.addAll(Arrays.asList(msg[2].split("\\|")));
+                gameInfo.scoreHistory.remove(gameInfo.scoreHistory.size()-1);
+                break;
             case "GameStarted":
                 hideStatus();
                 gameInfo.startRound(msg[2]);

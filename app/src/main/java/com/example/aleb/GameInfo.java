@@ -61,11 +61,14 @@ public class GameInfo {
     int zvanja_mi, zvanja_vi, igra_mi, igra_vi, ukupno_mi, ukupno_vi, partija_mi, partija_vi;
 
     GameInfo(String players, GameInfoInterface gameInfoInterface) {
-        String[] tmp = players.split(",");
-        this.players.add(tmp[0]);
-        this.players.add(tmp[2]);
-        this.players.add(tmp[1]);
-        this.players.add(tmp[3]);
+        this(players.split(","), gameInfoInterface);
+    }
+
+    GameInfo(String[] players, GameInfoInterface gameInfoInterface) {
+        this.players.add(players[0]);
+        this.players.add(players[2]);
+        this.players.add(players[1]);
+        this.players.add(players[3]);
 
         this.myPosition = this.players.indexOf(Constants.USERNAME);
         this.myTeam = this.myPosition % 2;
@@ -80,6 +83,7 @@ public class GameInfo {
         startingPlayer = currentPlayer;
         lastPlayer = (startingPlayer + 3) % 4;
 
+        resetCards();
         lastRoundCards[0] = new ArrayList<>();
         lastRoundCards[1] = new ArrayList<>();
         lastRoundCards[2] = new ArrayList<>();

@@ -635,9 +635,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="50dp"
-        android:layout_marginRight="50dp"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/g_lay_cards"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -660,9 +659,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="50dp"
-        android:layout_marginLeft="50dp"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/g_lay_playfield"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

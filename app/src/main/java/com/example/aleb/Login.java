@@ -72,8 +72,15 @@ public class Login extends AppCompatActivity implements TCPListener {
         Constants.USERNAME = l_username.getText().toString();
 
         Intent i = new Intent(Login.this, Rooms.class);
-        finish();
         startActivity(i);
+
+        if (status.equals("InGame")) {
+            Intent in = new Intent(Login.this, Game.class);
+            in.putExtra("reconnect", true);
+            startActivity(in);
+        }
+
+        finish();
     }
 
     @Override
