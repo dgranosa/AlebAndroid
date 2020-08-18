@@ -51,6 +51,7 @@ public class GameInfo {
     int[] playgroundCards;
 
     ArrayList<String>[] lastRoundCards = new ArrayList[4];
+    List<String> scoreHistory = new ArrayList<>();
 
     Adut adut;
     String adutSelectedByPlayer;

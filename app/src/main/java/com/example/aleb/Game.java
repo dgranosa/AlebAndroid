@@ -264,7 +264,7 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
                     ImageView img = new ImageView(Game.this);
                     img.setId(View.generateViewId());
                     img.setImageResource(cards[Integer.parseInt(c[i])]);
-                    if (id % 2 == gameInfo.myTeam) {
+                    if (id % 2 == 0) {
                         img.setLayoutParams(new ConstraintLayout.LayoutParams((int) (60 * getResources().getDisplayMetrics().density), (int) (90 * getResources().getDisplayMetrics().density)));
                     } else {
                         img.setRotation(90);
@@ -272,7 +272,7 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
                     }
                     lay.addView(img, 0);
                     set.clone(lay);
-                    if (id % 2 == gameInfo.myTeam) {
+                    if (id % 2 == 0) {
                         set.connect(img.getId(), ConstraintSet.TOP, lay.getId(), ConstraintSet.TOP, 0);
                         set.connect(img.getId(), ConstraintSet.BOTTOM, lay.getId(), ConstraintSet.BOTTOM, 0);
                         set.connect(img.getId(), ConstraintSet.LEFT, lay.getId(), ConstraintSet.LEFT, i * (int) (30 * getResources().getDisplayMetrics().density));
@@ -304,7 +304,7 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
     }
 
     public void showLastRoundCards(View v) {
-        int id = getIdPosition(playerId, v.getId());
+        final int id = getIdPosition(playerId, v.getId());
         if (gameInfo.lastRoundCards[id].size() == 0)
             return;
 
@@ -312,11 +312,19 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                hideZvanja();
+                ConstraintLayout lay = findViewById(getResources().getIdentifier("g_lay_zvanja_player"+id, "id", getPackageName()));
+                lay.removeAllViews();
+                lay.setVisibility(View.GONE);
             }
         }, 2000);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void showScoreHistory(View v) {
+        Toast.makeText(getApplicationContext(), String.join("\n", gameInfo.scoreHistory), Toast.LENGTH_LONG).show();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onTCPMessageReceived(String message) {
         String[] msg = message.split(";", -1);
@@ -426,6 +434,8 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
                     gameInfo.partija_vi = Integer.parseInt(final_score[0]);
                 }
                 onScoreChange();
+
+                gameInfo.scoreHistory.add(msg[1]);
                 break;
             case "GameFinished":
                 Intent in = new Intent(Game.this, Lobby.class);
@@ -437,6 +447,7 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
                 i.putExtra("score", msg[1]);
                 i.putExtra("roomInfo", msg[2]);
                 i.putExtra("team", gameInfo.myTeam);
+                i.putExtra("scoreHistory", String.join(";", gameInfo.scoreHistory));
                 finish();
                 startActivity(i);
                 break;
