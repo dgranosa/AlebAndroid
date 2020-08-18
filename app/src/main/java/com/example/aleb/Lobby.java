@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Lobby extends AppCompatActivity implements TCPListener {
@@ -28,6 +29,7 @@ public class Lobby extends AppCompatActivity implements TCPListener {
     private Boolean[] playerStates = {false, false, false, false};
     private ArrayAdapter<String> playersAdapter;
     private boolean status = false;
+    private String selectedPlayer;
 
     private TextView nameView;
     private ListView listView;
@@ -119,6 +121,25 @@ public class Lobby extends AppCompatActivity implements TCPListener {
         TCPCommunicator.sendMessage("StartGame", UIHandler, this);
     }
 
+    public void selectPlayer(View v) {
+        if (players.indexOf(Constants.USERNAME) != 0)
+            return;
+
+        String name = ((TextView)v).getText().toString();
+
+        if (selectedPlayer == null || selectedPlayer.equals(name)) {
+            selectedPlayer = name;
+            return;
+        }
+
+        TCPCommunicator.sendMessage("SwitchUsers;" + name + ";" + selectedPlayer, UIHandler, this);
+        selectedPlayer = null;
+    }
+
+    public void dismissSelectedPlayer(View v) {
+        selectedPlayer = null;
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onTCPMessageReceived(String message) {
@@ -148,6 +169,13 @@ public class Lobby extends AppCompatActivity implements TCPListener {
                 for (int i = position; i < players.size(); i++)
                     playerStates[i] = playerStates[i+1];
                 playerStates[players.size()] = false;
+                refreshLobbyInfo();
+                break;
+            case "UsersSwitched":
+                Collections.swap(players, players.indexOf(msg[1]), players.indexOf(msg[2]));
+                boolean tmp = playerStates[players.indexOf(msg[1])];
+                playerStates[players.indexOf(msg[1])] = playerStates[players.indexOf(msg[2])];
+                playerStates[players.indexOf(msg[2])] = tmp;
                 refreshLobbyInfo();
                 break;
         }
