@@ -190,8 +190,10 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
 
     private void bacenaKarta(int karta, boolean bela) {
         gameInfo.playgroundCards[gameInfo.currentPlayer] = karta;
-        if (bela)
-            showStatus(gameInfo.currentPlayer, "Bela", 1500);
+        if (bela) {
+            showStatus(gameInfo.currentPlayer, "Bela");
+            findViewById(R.id.g_lay_bela).setVisibility(View.GONE);
+        }
         onCardChange();
     }
 
@@ -305,6 +307,7 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
 
         switch (msg[0]) {
             case "GameStarted":
+                hideStatus();
                 gameInfo.startRound(msg[2]);
                 gameInfo.setStartingPlayer((Integer.parseInt(msg[1]) + 1) % 4);
                 break;
@@ -370,13 +373,14 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
                 gameInfo.updateScore(msg[1], msg[2]);
                 break;
             case "ContinuePlayingCards":
+                hideStatus();
                 gameInfo.cleanPlayground();
                 gameInfo.setStartingPlayer(Integer.parseInt(msg[1]));
                 break;
             case "FinalScores":
                 String[] scoreData = msg[1].split(",");
                 if (Boolean.parseBoolean(scoreData[3]))
-                    showStatus(gameInfo.players.indexOf(gameInfo.adutSelectedByPlayer), "Pad", 2000);
+                    showStatus(gameInfo.players.indexOf(gameInfo.adutSelectedByPlayer), "Pad");
 
                 gameInfo.zvanja_mi = gameInfo.zvanja_vi = gameInfo.igra_mi = gameInfo.igra_vi = 0;
                 if (gameInfo.myTeam == 0) {
@@ -408,6 +412,11 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
                 onScoreChange();
                 break;
             case "GameFinished":
+                Intent in = new Intent(Game.this, Lobby.class);
+                in.putExtra("roomInfo", msg[2]);
+                in.putExtra("playerStates", "False|False|False|False");
+                startActivity(in);
+
                 Intent i = new Intent(Game.this, ScoreScreen.class);
                 i.putExtra("score", msg[1]);
                 i.putExtra("roomInfo", msg[2]);

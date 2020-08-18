@@ -126,12 +126,11 @@ public class Lobby extends AppCompatActivity implements TCPListener {
 
         switch (msg[0]) {
             case "GameStarted":
-                playerStates = new Boolean[]{false, false, false, false};
-                refreshLobbyInfo();
                 Intent in = new Intent(Lobby.this, Game.class);
                 in.putExtra("meta??", msg[1]);
                 in.putExtra("startingCards", msg[2]);
                 in.putExtra("playerInfo", String.join(",", players));
+                finish();
                 startActivity(in);
                 break;
 
@@ -179,8 +178,8 @@ public class Lobby extends AppCompatActivity implements TCPListener {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    public void onBackPressed() {
+        super.onBackPressed();
 
         TCPCommunicator.sendMessage("LeaveRoom", UIHandler, this);
     }
