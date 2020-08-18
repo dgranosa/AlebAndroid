@@ -109,7 +109,7 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
     }
 
     public void pickTrump(View v) {
-        if (gameInfo.gameState != GameState.TRUMP_SELECTION) {
+        if (gameInfo.gameState != GameState.TRUMP) {
             Toast.makeText(getApplicationContext(), "Nije vrijeme odabira aduta", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -142,10 +142,10 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
     }
 
     public void selectCard(View v) {
-        if (gameInfo.gameState == GameState.TRUMP_SELECTION)
+        if (gameInfo.gameState == GameState.TRUMP)
             return;
 
-        if (gameInfo.gameState == GameState.DECLARE_SELECTION) {
+        if (gameInfo.gameState == GameState.DECLARE) {
             ImageView img = (ImageView)v;
             if (img.getScaleType() == ImageView.ScaleType.FIT_START)
                 img.setScaleType(ImageView.ScaleType.FIT_END);
@@ -153,7 +153,7 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
                 img.setScaleType(ImageView.ScaleType.FIT_START);
         }
 
-        if (gameInfo.gameState == GameState.PLAY_TIME) {
+        if (gameInfo.gameState == GameState.PLAY) {
             if (gameInfo.currentPlayer != 0) {
                 Toast.makeText(getApplicationContext(), "Niste na redu", Toast.LENGTH_SHORT).show();
                 return;
@@ -190,7 +190,7 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
     }
 
     public void zovi(View v) {
-        if (gameInfo.gameState != GameState.DECLARE_SELECTION)
+        if (gameInfo.gameState != GameState.DECLARE)
             return;
 
         if (v.getId() == R.id.g_zvanje_zovi) {
@@ -207,7 +207,7 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
     }
 
     public void bela(View v) {
-        if (gameInfo.gameState != GameState.PLAY_TIME)
+        if (gameInfo.gameState != GameState.PLAY)
             return;
 
         TCPCommunicator.sendMessage("Bela;" + (v.getId() == R.id.g_bela_da ? "True" : "False"), UIHandler, this);
@@ -364,7 +364,7 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
                             findViewById(R.id.g_lay_zvanja).setVisibility(View.GONE);
                         }
                     });
-                    gameInfo.gameState = GameState.PLAY_TIME;
+                    gameInfo.gameState = GameState.WAIT;
                 } else {
                     UIHandler.post(new Runnable() {
                         @Override
@@ -400,11 +400,13 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
                 });
                 break;
             case "TableComplete":
+                gameInfo.gameState = GameState.WAIT;
                 gameInfo.updateScore(msg[1], msg[2]);
                 break;
             case "ContinuePlayingCards":
                 hideStatus();
                 gameInfo.cleanPlayground();
+                gameInfo.gameState = GameState.PLAY;
                 gameInfo.setStartingPlayer(Integer.parseInt(msg[1]));
                 break;
             case "FinalScores":
@@ -476,10 +478,10 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
                 highlightPlayer(gameInfo.currentPlayer);
 
                 if (gameInfo.currentPlayer == 0) {
-                    if (gameInfo.gameState == GameState.TRUMP_SELECTION)
+                    if (gameInfo.gameState == GameState.TRUMP)
                         showTrump();
 
-                    if (gameInfo.gameState == GameState.DECLARE_SELECTION)
+                    if (gameInfo.gameState == GameState.DECLARE)
                         findViewById(R.id.g_lay_zvanja).setVisibility(View.VISIBLE);
                 }
             }

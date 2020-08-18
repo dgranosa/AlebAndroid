@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 enum GameState {
-    TRUMP_SELECTION, DECLARE_SELECTION, PLAY_TIME
+    TRUMP, DECLARE, PLAY, WAIT
 }
 
 enum Adut {
@@ -96,7 +96,7 @@ public class GameInfo {
         adut = Adut.NISTA;
         gameInfoInterface.onTrumpChange();
 
-        gameState = GameState.TRUMP_SELECTION;
+        gameState = GameState.TRUMP;
 
         resetCards();
         updateCards(cards);
@@ -108,7 +108,7 @@ public class GameInfo {
     }
 
     public void startPlaying() {
-        gameState = GameState.PLAY_TIME;
+        gameState = GameState.PLAY;
 
         currentPlayer = startingPlayer;
         gameInfoInterface.onPlayerChange();
@@ -158,7 +158,7 @@ public class GameInfo {
         adutSelectedByPlayer = players.get(currentPlayer);
         gameInfoInterface.onTrumpChange();
 
-        gameState = GameState.DECLARE_SELECTION;
+        gameState = GameState.DECLARE;
 
         currentPlayer = startingPlayer;
         gameInfoInterface.onPlayerChange();
