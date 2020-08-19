@@ -1,11 +1,7 @@
 package com.example.aleb;
 
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -14,6 +10,8 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -140,7 +138,6 @@ public class Lobby extends AppCompatActivity implements TCPListener {
         selectedPlayer = null;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onTCPMessageReceived(String message) {
         String[] msg = message.split(";");
@@ -150,7 +147,7 @@ public class Lobby extends AppCompatActivity implements TCPListener {
                 Intent in = new Intent(Lobby.this, Game.class);
                 in.putExtra("meta??", msg[1]);
                 in.putExtra("startingCards", msg[2]);
-                in.putExtra("playerInfo", String.join(",", players));
+                in.putExtra("playerInfo", Constants.stringJoin(",", players));
                 finish();
                 startActivity(in);
                 break;

@@ -1,32 +1,26 @@
 package com.example.aleb;
 
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.MediaStore;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.Checkable;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -288,10 +282,9 @@ public class Rooms extends AppCompatActivity implements TCPListener, RecyclerVie
 
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onLongItemClick(int position) {
-        Toast.makeText(getApplicationContext(), "Players: " + String.join(", ", rooms.get(position).getPlayers()), Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "Players: " + Constants.stringJoin(", ", rooms.get(position).getPlayers()), Toast.LENGTH_LONG).show();
     }
 
 

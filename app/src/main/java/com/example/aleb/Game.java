@@ -2,7 +2,6 @@ package com.example.aleb;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -12,7 +11,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
@@ -316,12 +314,10 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
         }, 2000);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public void showScoreHistory(View v) {
-        Toast.makeText(getApplicationContext(), String.join("\n", gameInfo.scoreHistory), Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), Constants.stringJoin("\n", gameInfo.scoreHistory), Toast.LENGTH_LONG).show();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onTCPMessageReceived(String message) {
         String[] msg = message.split(";", -1);
@@ -330,8 +326,13 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
             case "Reconnect":
                 gameInfo = new GameInfo(Room.parse(msg[1]).getPlayers(), this);
 
-                for (int i = 0; i < playerId.length; i++)
-                    ((TextView)findViewById(playerId[i])).setText(gameInfo.players.get(i));
+                UIHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (int i = 0; i < playerId.length; i++)
+                            ((TextView)findViewById(playerId[i])).setText(gameInfo.players.get(i));
+                    }
+                });
 
                 gameInfo.scoreHistory.addAll(Arrays.asList(msg[2].split("\\|")));
                 gameInfo.scoreHistory.remove(gameInfo.scoreHistory.size()-1);
@@ -455,7 +456,7 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
                 i.putExtra("score", msg[1]);
                 i.putExtra("roomInfo", msg[2]);
                 i.putExtra("team", gameInfo.myTeam);
-                i.putExtra("scoreHistory", String.join(";", gameInfo.scoreHistory));
+                i.putExtra("scoreHistory", Constants.stringJoin(";", gameInfo.scoreHistory));
                 finish();
                 startActivity(i);
                 break;
