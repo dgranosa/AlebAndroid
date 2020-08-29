@@ -23,7 +23,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             tools:layout_editor_absoluteX="1dp"
-            tools:layout_editor_absoluteY="1dp" />
+            tools:layout_editor_absoluteY="1dp"
+            tools:listitem="@layout/row_room" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
@@ -42,28 +43,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:maxImageSize="30dp"
         app:srcCompat="@android:drawable/ic_menu_add" />
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/lay_test"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
-        android:layout_marginLeft="30dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/lay_test2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="30dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

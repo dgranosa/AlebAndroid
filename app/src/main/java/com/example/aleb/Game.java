@@ -1,19 +1,29 @@
 package com.example.aleb;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Checkable;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Arrays;
 import java.util.Timer;
@@ -31,8 +41,8 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
     private int[] statusId = new int[]{R.id.g_status_player0, R.id.g_status_player1, R.id.g_status_player2, R.id.g_status_player3, R.id.g_status};
     private int[] playerId = new int[]{R.id.g_name0, R.id.g_name1, R.id.g_name2, R.id.g_name3};
 
-    private String[] adut = new String[]{"Hearts", "Leaves", "Acorns", "Bells"};
-    private int[] adutId = new int[]{R.drawable.hearts, R.drawable.leaves, R.drawable.acorns, R.drawable.bells};
+    public static String[] adut = new String[]{"Hearts", "Leaves", "Acorns", "Bells"};
+    public static int[] adutId = new int[]{R.drawable.hearts, R.drawable.leaves, R.drawable.acorns, R.drawable.bells};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -315,7 +325,19 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
     }
 
     public void showScoreHistory(View v) {
-        Toast.makeText(getApplicationContext(), Constants.stringJoin("\n", gameInfo.scoreHistory), Toast.LENGTH_LONG).show();
+        AlertDialog.Builder mBuilder = new AlertDialog.Builder(this);
+        View mView = getLayoutInflater().inflate(R.layout.dialog_score, null);
+
+        ((TextView)mView.findViewById(R.id.score_l_sum0)).setText(String.valueOf(gameInfo.partija_mi));
+        ((TextView)mView.findViewById(R.id.score_l_sum1)).setText(String.valueOf(gameInfo.partija_vi));
+
+        RecyclerView recyclerView = mView.findViewById(R.id.score_r_score);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(new MyScoreAdapter(gameInfo.scoreHistory));
+
+        mBuilder.setView(mView);
+        AlertDialog dialog = mBuilder.create();
+        dialog.show();
     }
 
     @Override
@@ -572,14 +594,14 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
         });
     }
 
-    private int getIdPosition(int[] array, int id) {
+    public static int getIdPosition(int[] array, int id) {
         for (int i = 0; i < array.length; i++)
             if (array[i] == id)
                 return i;
         return -1;
     }
 
-    private int getIdPosition(String[] array, String id) {
+    public static int getIdPosition(String[] array, String id) {
         for (int i = 0; i < array.length; i++)
             if (array[i].equals(id))
                 return i;
