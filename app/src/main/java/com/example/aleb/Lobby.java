@@ -7,13 +7,19 @@ import android.os.Handler;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,13 +31,14 @@ public class Lobby extends AppCompatActivity implements TCPListener {
     private Room room;
     private List<String> players = new ArrayList<>();
     private Boolean[] playerStates = {false, false, false, false};
-    private ArrayAdapter<String> playersAdapter;
     private boolean status = false;
     private String selectedPlayer;
 
     private TextView nameView;
-    private ListView listView;
     private Button startView;
+
+    private int playerNameIds[] = {R.id.lobby_l_player0, R.id.lobby_l_player1, R.id.lobby_l_player2, R.id.lobby_l_player3};
+    private int playerStatusIds[] = {R.id.lobby_i_player0, R.id.lobby_i_player1, R.id.lobby_i_player2, R.id.lobby_i_player3};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,27 +50,28 @@ public class Lobby extends AppCompatActivity implements TCPListener {
         tcpClient.addListener(this);
 
         nameView = findViewById(R.id.l_roomName);
-        listView = findViewById(R.id.li_players);
         startView = findViewById(R.id.b_start);
 
-        playersAdapter = new ArrayAdapter<String>(this, R.layout.player_item, players);
-        listView.setAdapter(playersAdapter);
-
         Bundle bundle = getIntent().getExtras();
-        fillLobbyInfo(bundle.getString("roomInfo"), bundle.getString("playerStates"));
+        fillLobbyInfo(bundle.getString("roomInfo"), bundle.getString("playerStates"), bundle.getString("score", null));
 
         nameView.setText(room.getName());
+        nameView.setSelected(true);
     }
 
-    private void fillLobbyInfo(String roomData, String userStatesData) {
+    private void fillLobbyInfo(String roomData, String userStatesData, String score) {
         room = Room.parse(roomData);
 
-        for (int i = 0; i < room.getNumOfPlayers(); i++)
-            players.add(room.getPlayers()[i]);
+        players.addAll(Arrays.asList(room.getPlayers()));
 
         String[] tmp = userStatesData.split("\\|");
         for (int i = 0; i < room.getNumOfPlayers(); i++)
             playerStates[i] = Boolean.parseBoolean(tmp[i]);
+
+        if (score != null) {
+            findViewById(R.id.lobby_l_score).setVisibility(View.VISIBLE);
+            ((TextView)findViewById(R.id.lobby_l_score)).setText(score);
+        }
 
         refreshLobbyInfo();
     }
@@ -72,17 +80,28 @@ public class Lobby extends AppCompatActivity implements TCPListener {
         UIHandler.post(new Runnable() {
             @Override
             public void run() {
-                playersAdapter.notifyDataSetChanged();
-
                 int numOfPlayerReady = 0;
 
                 for (int i = 0; i < players.size(); i++) {
+                    TextView nameView = findViewById(playerNameIds[i]);
+                    ImageView statusView = findViewById(playerStatusIds[i]);
+
+                    nameView.setText(players.get(i));
+
                     if (playerStates[i])
-                        getViewByPosition(i, listView).setBackgroundColor(getResources().getColor(R.color.Ready));
+                        statusView.setImageResource(R.drawable.ic_check_on);
                     else
-                        getViewByPosition(i, listView).setBackgroundColor(getResources().getColor(R.color.NotReady));
+                        statusView.setImageResource(R.drawable.ic_check_off);
 
                     numOfPlayerReady += playerStates[i] ? 1 : 0;
+
+                    nameView.setVisibility(View.VISIBLE);
+                    statusView.setVisibility(View.VISIBLE);
+                }
+
+                for (int i = players.size(); i < 4; i++) {
+                    findViewById(playerNameIds[i]).setVisibility(View.INVISIBLE);
+                    findViewById(playerStatusIds[i]).setVisibility(View.INVISIBLE);
                 }
 
                 if (players.get(0).equals(Constants.USERNAME) && numOfPlayerReady == 4)
@@ -95,9 +114,7 @@ public class Lobby extends AppCompatActivity implements TCPListener {
 
     public void toggleReady(View v) {
         status = !status;
-        String s = status ? "True" : "False";
-
-        TCPCommunicator.sendMessage("SetReady;" + s, UIHandler, this);
+        TCPCommunicator.sendMessage("SetReady;" + (status ? "True" : "False"), UIHandler, this);
     }
 
     public void startGame(View v) {
@@ -121,6 +138,9 @@ public class Lobby extends AppCompatActivity implements TCPListener {
 
     public void selectPlayer(View v) {
         if (players.indexOf(Constants.USERNAME) != 0)
+            return;
+
+        if (v.getVisibility() != View.VISIBLE)
             return;
 
         String name = ((TextView)v).getText().toString();
@@ -170,9 +190,7 @@ public class Lobby extends AppCompatActivity implements TCPListener {
                 break;
             case "UsersSwitched":
                 Collections.swap(players, players.indexOf(msg[1]), players.indexOf(msg[2]));
-                boolean tmp = playerStates[players.indexOf(msg[1])];
-                playerStates[players.indexOf(msg[1])] = playerStates[players.indexOf(msg[2])];
-                playerStates[players.indexOf(msg[2])] = tmp;
+                playerStates[players.indexOf(msg[1])] = playerStates[players.indexOf(msg[2])] = false;
                 refreshLobbyInfo();
                 break;
         }
@@ -181,18 +199,6 @@ public class Lobby extends AppCompatActivity implements TCPListener {
     @Override
     public void onTCPConnectionStatusChanged(boolean isConnectedNow) {
 
-    }
-
-    private View getViewByPosition(int pos, ListView listView) {
-        final int firstListItemPosition = listView.getFirstVisiblePosition();
-        final int lastListItemPosition = firstListItemPosition + listView.getChildCount() - 1;
-
-        if (pos < firstListItemPosition || pos > lastListItemPosition ) {
-            return listView.getAdapter().getView(pos, null, listView);
-        } else {
-            final int childIndex = pos - firstListItemPosition;
-            return listView.getChildAt(childIndex);
-        }
     }
 
     @Override

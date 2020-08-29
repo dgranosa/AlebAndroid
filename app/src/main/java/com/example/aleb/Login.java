@@ -59,6 +59,16 @@ public class Login extends AppCompatActivity implements TCPListener {
     }
 
     private void onLogin(String status) {
+        if (status.equals("null")) {
+            UIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getApplicationContext(), "Login unsuccessful", Toast.LENGTH_LONG).show();
+                }
+            });
+            return;
+        }
+
         UIHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -87,13 +97,8 @@ public class Login extends AppCompatActivity implements TCPListener {
     public void onTCPMessageReceived(String message) {
         String[] msg = message.split(";");
 
-        switch (msg[0]) {
-            case "LoginResult":
-                if (!msg[1].equals("Null"))
-                    onLogin(msg[1]);
-                else
-                    Toast.makeText(getApplicationContext(), "Login unsuccessful", Toast.LENGTH_LONG).show();
-                break;
+        if (msg[0].equals("LoginResult")) {
+            onLogin(msg[1]);
         }
     }
 

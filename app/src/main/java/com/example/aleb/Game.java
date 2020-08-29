@@ -230,7 +230,7 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
 
         showStatus(4, String.valueOf(zvanje));
 
-        if (id % 2 == gameInfo.myTeam)
+        if (id % 2 == 0)
             gameInfo.zvanja_mi += zvanje;
         else
             gameInfo.zvanja_vi += zvanje;
@@ -333,6 +333,20 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
                             ((TextView)findViewById(playerId[i])).setText(gameInfo.players.get(i));
                     }
                 });
+
+                new Timer().schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        UIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                hideStatus();
+                                hideZvanja();
+                                findViewById(R.id.g_lay_bela).setVisibility(View.GONE);
+                            }
+                        });
+                    }
+                }, 2000);
 
                 gameInfo.scoreHistory.addAll(Arrays.asList(msg[2].split("\\|")));
                 gameInfo.scoreHistory.remove(gameInfo.scoreHistory.size()-1);
