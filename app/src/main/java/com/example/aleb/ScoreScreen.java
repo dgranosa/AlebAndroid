@@ -1,7 +1,10 @@
 package com.example.aleb;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.widget.TextView;
 
@@ -15,6 +18,7 @@ public class ScoreScreen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_score_screen);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         status = findViewById(R.id.r_l_status);
         score_mi = findViewById(R.id.r_l_score_mi);
@@ -28,6 +32,10 @@ public class ScoreScreen extends AppCompatActivity {
         Room room = Room.parse(bundle.getString("roomInfo"));
         String[] score = bundle.getString("score").split("\\|");
         int team = bundle.getInt("team");
+
+        RecyclerView recyclerView = findViewById(R.id.ss_r_score);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(new MyScoreAdapter(bundle.getString("scoreHistory","").split(";")));
 
         if (team == 0) {
             int[] result = new int[]{Integer.parseInt(score[0]), Integer.parseInt(score[1])};

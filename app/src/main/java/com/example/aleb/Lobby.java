@@ -5,18 +5,12 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +27,7 @@ public class Lobby extends AppCompatActivity implements TCPListener {
     private Boolean[] playerStates = {false, false, false, false};
     private boolean status = false;
     private String selectedPlayer;
+    private String lobbyGameInfo;
 
     private TextView nameView;
     private Button startView;
@@ -53,13 +48,14 @@ public class Lobby extends AppCompatActivity implements TCPListener {
         startView = findViewById(R.id.b_start);
 
         Bundle bundle = getIntent().getExtras();
-        fillLobbyInfo(bundle.getString("roomInfo"), bundle.getString("playerStates"), bundle.getString("score", null));
+        lobbyGameInfo = bundle.getString("gameInfo", null);
+        fillLobbyInfo(bundle.getString("roomInfo"), bundle.getString("playerStates"), lobbyGameInfo);
 
         nameView.setText(room.getName());
         nameView.setSelected(true);
     }
 
-    private void fillLobbyInfo(String roomData, String userStatesData, String score) {
+    private void fillLobbyInfo(String roomData, String userStatesData, String gameInfo) {
         room = Room.parse(roomData);
 
         players.addAll(Arrays.asList(room.getPlayers()));
@@ -68,9 +64,21 @@ public class Lobby extends AppCompatActivity implements TCPListener {
         for (int i = 0; i < room.getNumOfPlayers(); i++)
             playerStates[i] = Boolean.parseBoolean(tmp[i]);
 
-        if (score != null) {
+        if (gameInfo != null) {
             findViewById(R.id.lobby_l_score).setVisibility(View.VISIBLE);
-            ((TextView)findViewById(R.id.lobby_l_score)).setText(score);
+            findViewById(R.id.lobby_separator).setVisibility(View.VISIBLE);
+            findViewById(R.id.lobby_lay_info).setVisibility(View.VISIBLE);
+
+            String[] data = gameInfo.split(",");
+
+            ((TextView)findViewById(R.id.lobby_l_score)).setText(data[0] + " : " + data[1]);
+            ((TextView)findViewById(R.id.lobby_l_ukupno_mi)).setText(data[2]);
+            ((TextView)findViewById(R.id.lobby_l_ukupno_vi)).setText(data[3]);
+            ((TextView)findViewById(R.id.lobby_l_zvanja_mi)).setText(data[4]);
+            ((TextView)findViewById(R.id.lobby_l_zvanja_vi)).setText(data[5]);
+            ((TextView)findViewById(R.id.lobby_l_rusili_mi)).setText(data[6]);
+            ((TextView)findViewById(R.id.lobby_l_rusili_vi)).setText(data[7]);
+
         }
 
         refreshLobbyInfo();
@@ -168,6 +176,7 @@ public class Lobby extends AppCompatActivity implements TCPListener {
                 in.putExtra("meta??", msg[1]);
                 in.putExtra("startingCards", msg[2]);
                 in.putExtra("playerInfo", Constants.stringJoin(",", players));
+                in.putExtra("lobbyGameInfo", lobbyGameInfo);
                 finish();
                 startActivity(in);
                 break;

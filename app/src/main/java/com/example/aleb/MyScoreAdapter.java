@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class MyScoreAdapter extends RecyclerView.Adapter<MyScoreAdapter.MyScoreViewHolder> {
@@ -17,6 +18,10 @@ public class MyScoreAdapter extends RecyclerView.Adapter<MyScoreAdapter.MyScoreV
 
     MyScoreAdapter(List <String> score) {
         this.score = score;
+    }
+
+    MyScoreAdapter(String[] score) {
+        this(Arrays.asList(score));
     }
 
     @NonNull

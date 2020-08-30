@@ -68,7 +68,7 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
         Intent it = getIntent();
         Bundle bundle = it.getExtras();
 
-        gameInfo = new GameInfo(bundle.getString("playerInfo"), this);
+        gameInfo = new GameInfo(bundle.getString("playerInfo"), bundle.getString("lobbyGameInfo", null), this);
         gameInfo.startRound(bundle.getString("startingCards"));
 
         for (int i = 0; i < playerId.length; i++)
@@ -103,6 +103,7 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
     private void highlightPlayer(int id) {
         for (int i : playerId)
             ((TextView)findViewById(i)).setTextColor(getResources().getColor(R.color.Idle));
+        ((TextView)findViewById(playerId[gameInfo.lastPlayer])).setTextColor(getResources().getColor(R.color.Moose));
         ((TextView)findViewById(playerId[id])).setTextColor(getResources().getColor(R.color.Ready));
     }
 
@@ -342,11 +343,11 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
 
     @Override
     public void onTCPMessageReceived(String message) {
-        String[] msg = message.split(";", -1);
+        final String[] msg = message.split(";", -1);
 
         switch (msg[0]) {
             case "Reconnect":
-                gameInfo = new GameInfo(Room.parse(msg[1]).getPlayers(), this);
+                gameInfo = new GameInfo(Room.parse(msg[1]).getPlayers(), null, this);
 
                 UIHandler.post(new Runnable() {
                     @Override
@@ -362,21 +363,24 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
                         UIHandler.post(new Runnable() {
                             @Override
                             public void run() {
-                                hideStatus();
-                                hideZvanja();
-                                findViewById(R.id.g_lay_bela).setVisibility(View.GONE);
+                                if (gameInfo.gameState == GameState.PLAY) {
+                                    hideStatus();
+                                    hideZvanja();
+                                    findViewById(R.id.g_lay_bela).setVisibility(View.GONE);
+                                }
                             }
                         });
                     }
-                }, 2000);
+                }, 1500);
 
-                gameInfo.scoreHistory.addAll(Arrays.asList(msg[2].split("\\|")));
+                for (String score : msg[2].split("\\|"))
+                    gameInfo.addToScoreHistory(score);
                 gameInfo.scoreHistory.remove(gameInfo.scoreHistory.size()-1);
                 break;
             case "GameStarted":
                 hideStatus();
                 gameInfo.startRound(msg[2]);
-                gameInfo.setStartingPlayer((Integer.parseInt(msg[1]) + 1) % 4);
+                gameInfo.setStartingPlayer((Integer.parseInt(msg[1]) + 1) % 4, true);
                 break;
             case "TrumpNext":
                 showStatus(gameInfo.currentPlayer, "Dalje");
@@ -448,8 +452,17 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
                 break;
             case "FinalScores":
                 String[] scoreData = msg[1].split(",");
-                if (Boolean.parseBoolean(scoreData[3]))
+                if (Boolean.parseBoolean(scoreData[3])) {
                     showStatus(gameInfo.players.indexOf(gameInfo.adutSelectedByPlayer), "Pad");
+
+                    if (gameInfo.players.indexOf(gameInfo.adutSelectedByPlayer) % 2 == 1)
+                        gameInfo.ukupno_rusili_mi++;
+                    else
+                        gameInfo.ukupno_rusili_vi++;
+                }
+
+                gameInfo.ukupno_zvanja_mi += gameInfo.zvanja_mi;
+                gameInfo.ukupno_zvanja_vi += gameInfo.zvanja_vi;
 
                 gameInfo.zvanja_mi = gameInfo.zvanja_vi = gameInfo.igra_mi = gameInfo.igra_vi = 0;
                 if (gameInfo.myTeam == 0) {
@@ -480,12 +493,21 @@ public class Game extends AppCompatActivity implements TCPListener, GameInfoInte
                 }
                 onScoreChange();
 
-                gameInfo.scoreHistory.add(msg[1]);
+                gameInfo.addToScoreHistory(msg[1]);
                 break;
             case "GameFinished":
+                if (gameInfo.partija_mi > gameInfo.partija_vi)
+                    gameInfo.score_mi++;
+                else
+                    gameInfo.score_vi++;
+
+                gameInfo.ukupno_score_mi += gameInfo.partija_mi;
+                gameInfo.ukupno_score_vi += gameInfo.partija_vi;
+
                 Intent in = new Intent(Game.this, Lobby.class);
                 in.putExtra("roomInfo", msg[2]);
                 in.putExtra("playerStates", "False|False|False|False");
+                in.putExtra("gameInfo", gameInfo.getLobbyGameInfo());
                 startActivity(in);
 
                 Intent i = new Intent(Game.this, ScoreScreen.class);
