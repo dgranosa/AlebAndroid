@@ -3,6 +3,7 @@ package com.example.aleb;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -68,7 +69,9 @@ public class MainActivity extends AppCompatActivity implements TCPListener {
                 UIHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        l_status.setText("Update application");
+                        l_status.setText("Update application\nCurrent version: " + Constants.VERSION);
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/dgranosa/AlebAndroid/releases/latest/download/Aleb.apk"));
+                        startActivity(browserIntent);
                     }
                 });
             }
